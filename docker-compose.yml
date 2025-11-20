@@ -4,7 +4,7 @@ services:
         env_file: ".env"
         # networks:
         #     - dcm4chee_network
-        container_name: ldap
+        container_name: mri_ldap
         ports:
             - ${SLAPD_PORT}:389
         volumes:
@@ -15,7 +15,7 @@ services:
         # networks:
             # - dcm4chee_network
         env_file: ".env"
-        container_name: db
+        container_name: mri_db
         ports:
             - 5432:5432
         environment:
@@ -32,7 +32,7 @@ services:
         # networks:
         #     - dcm4chee_network
         env_file: ".env"
-        container_name: arc
+        container_name: mri_arc
         ports:
             - ${ARC_PORT}:8080
             - 8443:8443
@@ -46,7 +46,7 @@ services:
             - POSTGRES_DB=${POSTGRES_DB}
             - POSTGRES_USER=${POSTGRES_USER}
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-            - WILDFLY_WAIT_FOR=ldap:389 db:5432
+            - WILDFLY_WAIT_FOR=mri_ldap:389 mri_db:5432
         volumes:
             - /etc/localtime:/etc/localtime:ro
             # - /etc/timezone:/etc/timezone:ro
