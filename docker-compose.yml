@@ -1,0 +1,58 @@
+version: "3"
+services:
+    slapd-dcm4chee:
+        env_file: ".env"
+        # networks:
+        #     - dcm4chee_network
+        container_name: ldap
+        ports:
+            - ${SLAPD_PORT}:389
+        volumes:
+            - ${DATA}/dcm4chee-arc/ldap:/var/lib/openldap/openldap-data
+            - ${DATA}/dcm4chee-arc/slapd.d:/etc/openldap/slapd.d
+        image: docker.io/dcm4che/slapd-dcm4chee:2.6.8-34.1
+    postgres-dcm4chee:
+        # networks:
+            # - dcm4chee_network
+        env_file: ".env"
+        container_name: db
+        ports:
+            - 5432:5432
+        environment:
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_PASSWORD=pacs
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            # - /etc/timezone:/etc/timezone:ro
+            - ${DATA}/dcm4chee-arc/db:/var/lib/postgresql/data
+        image: docker.io/dcm4che/postgres-dcm4chee:17.4-34
+    dcm4chee-arc-psql:
+        # networks:
+        #     - dcm4chee_network
+        env_file: ".env"
+        container_name: arc
+        ports:
+            - ${ARC_PORT}:8080
+            - 8443:8443
+            - 9990:9990
+            - 9993:9993
+            - 11112:11112
+            - 2762:2762
+            - 2575:2575
+            - 12575:12575
+        environment:
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - WILDFLY_WAIT_FOR=ldap:389 db:5432
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            # - /etc/timezone:/etc/timezone:ro
+            - ${DATA}/dcm4chee-arc/wildfly:/opt/wildfly/standalone
+        image: docker.io/dcm4che/dcm4chee-arc-psql:5.34.1
+# networks:
+#     dcm4chee_network:
+#         external: true
+#         name: dcm4chee_network
